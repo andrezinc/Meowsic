@@ -45,7 +45,7 @@ final class Gato: SKSpriteNode {
         guard let model = model else { return }
         model.sounds.removeAll { $0 == nomeSound }
 
-        // Remove indicador de carregamento anterior antes de carregar o novo som
+        removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
 
         audio.preparar(slot: slot, soundName: soundName)
@@ -72,22 +72,32 @@ final class Gato: SKSpriteNode {
         audio.setMute(slot: slot, muted: isSoundPaused)
 
         if isSoundPaused {
-            run(SKAction.fadeAlpha(to: 0.5, duration: 0.2))
+            removeAction(forKey: "playingAnimation")
+            run(SKAction.group([
+                SKAction.fadeAlpha(to: 0.5, duration: 0.2),
+                SKAction.scale(to: 1.0, duration: 0.1),
+            ]))
         } else {
             run(SKAction.fadeAlpha(to: 1.0, duration: 0.2))
+            // dança retoma no próximo ciclo de mostrarCarregamento
         }
     }
 
     func mute() {
         isSoundPaused = true
         audio.setMute(slot: slot, muted: true)
-        run(SKAction.fadeAlpha(to: 0.5, duration: 0.2))
+        removeAction(forKey: "playingAnimation")
+        run(SKAction.group([
+            SKAction.fadeAlpha(to: 0.5, duration: 0.2),
+            SKAction.scale(to: 1.0, duration: 0.1),
+        ]))
     }
 
     func noMute() {
         isSoundPaused = false
         audio.setMute(slot: slot, muted: false)
         run(SKAction.fadeAlpha(to: 1, duration: 0.2))
+        // dança retoma no próximo ciclo de mostrarCarregamento
     }
 
     // MARK: - Reset (swipe para baixo)
@@ -96,6 +106,7 @@ final class Gato: SKSpriteNode {
         guard isCustomizado else { return }
 
         audio.remover(slot: slot)
+        removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
 
         texture = SKTexture(imageNamed: "Default")
@@ -108,6 +119,7 @@ final class Gato: SKSpriteNode {
 
     func reset() {
         audio.remover(slot: slot)
+        removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
 
         texture = SKTexture(imageNamed: "Default")
@@ -126,33 +138,47 @@ final class Gato: SKSpriteNode {
     func mostrarCarregamento() {
         // Gatos sem som atribuído não exibem indicador
         guard isCustomizado, !nomeSound.isEmpty else {
+            removeAction(forKey: "playingAnimation")
             childNode(withName: "loadingIndicator")?.removeFromParent()
             return
         }
 
         if !audio.estaTocando(slot: slot) {
-            
             if childNode(withName: "loadingIndicator") == nil {
                 let texture = SKTexture(imageNamed: "carregamento")
                 let scaledSize = CGSize(
                     width: texture.size().width * 0.03,
                     height: texture.size().height * 0.03
                 )
-                
+
                 let carregamento = SKShapeNode(rectOf: scaledSize)
                 carregamento.name = "loadingIndicator"
                 carregamento.fillTexture = texture
                 carregamento.position = position
                 carregamento.position.y -= size.height / 2 + 90
-                carregamento.position.x -= 50 * CGFloat(slot + 1)
+                carregamento.position.x -= 111 * CGFloat(slot + 1)
                 carregamento.fillColor = .white
                 carregamento.strokeColor = .clear
                 carregamento.zPosition = 1
+                carregamento.run(SKAction.repeatForever(
+                    SKAction.sequence([
+                        SKAction.rotate(byAngle: .pi / 4, duration: 0.2),
+                    ])
+                ))
                 addChild(carregamento)
             }
         } else {
             // Áudio audível — remove indicador
             childNode(withName: "loadingIndicator")?.removeFromParent()
+            // Inicia dança apenas uma vez (evita reiniciar toda frame)
+            if !isSoundPaused, action(forKey: "playingAnimation") == nil {
+                run(SKAction.repeatForever(
+                    SKAction.sequence([
+                        SKAction.scaleY(to: 1.15, duration: 0.3),
+                        SKAction.scaleY(to: 1.0,  duration: 0.3),
+                    ])
+                ), withKey: "playingAnimation")
+            }
         }
     }
 }

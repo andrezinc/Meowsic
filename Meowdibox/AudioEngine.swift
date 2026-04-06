@@ -173,8 +173,16 @@ final class AudioEngine {
         anchorWallClock = nil
     }
 
-    func pausarTudo() {}
-    func resumirTudo() {}
+    func pausarTudo() {
+        for slot in Array(players.keys) {
+            setMute(slot: slot, muted: true)
+        }
+    }
+    func resumirTudo() {
+        for slot in Array(players.keys) {
+            setMute(slot: slot, muted: false)
+        }
+    }
 
     // MARK: - Estado
 
