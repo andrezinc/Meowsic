@@ -34,20 +34,20 @@ final class Gato: SKSpriteNode {
 
     // MARK: - Executar (chamado pelo GameScene a cada ciclo)
 
-    /// O AudioEngine cuida do loop internamente via scheduleBuffer(.loops).
-    /// Aqui apenas garantimos que o player esteja tocando.
     func executar() {
         guard isCustomizado, !nomeSound.isEmpty, !isSoundPaused else { return }
-        // Se por algum motivo o player parou, reinicia sincronizado
         run(SKAction.scaleX(to: 1, duration: 2))
     }
 
     // MARK: - Aplicar textura e som (drag & drop)
 
     func changeTextureSound(textureName: String, soundName: String) {
-        // Prepara o som no engine (para anterior, carrega novo, toca sync)
         guard let model = model else { return }
         model.sounds.removeAll { $0 == nomeSound }
+
+        // Remove indicador de carregamento anterior antes de carregar o novo som
+        childNode(withName: "loadingIndicator")?.removeFromParent()
+
         audio.preparar(slot: slot, soundName: soundName)
 
         let newTexture = SKTexture(imageNamed: textureName)
@@ -58,7 +58,6 @@ final class Gato: SKSpriteNode {
         alpha = 1.0
         size = originalSize
 
-        // Feedback visual
         let scaleUp = SKAction.scale(to: 1.2, duration: 0.1)
         let scaleDown = SKAction.scale(to: 1.0, duration: 0.15)
         run(SKAction.sequence([scaleUp, scaleDown]))
@@ -70,8 +69,6 @@ final class Gato: SKSpriteNode {
         guard isCustomizado, !nomeSound.isEmpty else { return }
 
         isSoundPaused.toggle()
-        // Mute/unmute — o player continua rodando em sync,
-        // só não emite som. Ao desmutar, volta no ponto certo.
         audio.setMute(slot: slot, muted: isSoundPaused)
 
         if isSoundPaused {
@@ -83,13 +80,13 @@ final class Gato: SKSpriteNode {
 
     func mute() {
         isSoundPaused = true
-        audio.setMute(slot: slot, muted: isSoundPaused)
+        audio.setMute(slot: slot, muted: true)
         run(SKAction.fadeAlpha(to: 0.5, duration: 0.2))
     }
 
     func noMute() {
         isSoundPaused = false
-        audio.setMute(slot: slot, muted: isSoundPaused)
+        audio.setMute(slot: slot, muted: false)
         run(SKAction.fadeAlpha(to: 1, duration: 0.2))
     }
 
@@ -99,9 +96,9 @@ final class Gato: SKSpriteNode {
         guard isCustomizado else { return }
 
         audio.remover(slot: slot)
+        childNode(withName: "loadingIndicator")?.removeFromParent()
 
-        let defaultTexture = SKTexture(imageNamed: "Default")
-        texture = defaultTexture
+        texture = SKTexture(imageNamed: "Default")
         size = originalSize
         nomeSound = ""
         isSoundPaused = false
@@ -111,9 +108,9 @@ final class Gato: SKSpriteNode {
 
     func reset() {
         audio.remover(slot: slot)
+        childNode(withName: "loadingIndicator")?.removeFromParent()
 
-        let defaultTexture = SKTexture(imageNamed: "Default")
-        texture = defaultTexture
+        texture = SKTexture(imageNamed: "Default")
         size = originalSize
         nomeSound = ""
         isSoundPaused = false
@@ -121,25 +118,41 @@ final class Gato: SKSpriteNode {
         alpha = 1.0
     }
 
+    // MARK: - Indicador de carregamento
+
+    /// Chamado a cada frame pelo GameScene.update().
+    /// Mostra o indicador enquanto o som está agendado mas ainda não é audível.
+    /// Cria o node filho apenas uma vez — evita spam de criação a cada frame.
     func mostrarCarregamento() {
+        // Gatos sem som atribuído não exibem indicador
+        guard isCustomizado, !nomeSound.isEmpty else {
+            childNode(withName: "loadingIndicator")?.removeFromParent()
+            return
+        }
+
         if !audio.estaTocando(slot: slot) {
-            var carregamento: SKShapeNode
-            let texture = SKTexture(imageNamed: "carregamento")
-            let scaledSize = CGSize(
-                width: texture.size().width * 0.03,
-                height: texture.size().height * 0.03
-            )
-            carregamento = SKShapeNode(rectOf: scaledSize)
-            carregamento.fillTexture = texture
-            carregamento.position = position
-            carregamento.position.y -= size.height / 2 + 90
-            carregamento.position.x -= 90 * CGFloat(slot + 1)
-            carregamento.fillColor = .white
-            carregamento.strokeColor = .clear
-            carregamento.zPosition = 1
-            addChild(carregamento)
+            
+            if childNode(withName: "loadingIndicator") == nil {
+                let texture = SKTexture(imageNamed: "carregamento")
+                let scaledSize = CGSize(
+                    width: texture.size().width * 0.03,
+                    height: texture.size().height * 0.03
+                )
+                
+                let carregamento = SKShapeNode(rectOf: scaledSize)
+                carregamento.name = "loadingIndicator"
+                carregamento.fillTexture = texture
+                carregamento.position = position
+                carregamento.position.y -= size.height / 2 + 90
+                carregamento.position.x -= 50 * CGFloat(slot + 1)
+                carregamento.fillColor = .white
+                carregamento.strokeColor = .clear
+                carregamento.zPosition = 1
+                addChild(carregamento)
+            }
         } else {
-            removeAllChildren()
+            // Áudio audível — remove indicador
+            childNode(withName: "loadingIndicator")?.removeFromParent()
         }
     }
 }
