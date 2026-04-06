@@ -137,7 +137,7 @@ final class Gato: SKSpriteNode {
     /// Cria o node filho apenas uma vez — evita spam de criação a cada frame.
     func mostrarCarregamento() {
         // Gatos sem som atribuído não exibem indicador
-        guard isCustomizado, !nomeSound.isEmpty else {
+        guard isCustomizado, !nomeSound.isEmpty,!isSoundPaused else {
             removeAction(forKey: "playingAnimation")
             childNode(withName: "loadingIndicator")?.removeFromParent()
             return

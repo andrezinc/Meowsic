@@ -16,7 +16,7 @@ struct ContentView: View {
                         .resizable()
                         .scaledToFill()
                         .ignoresSafeArea()
-                    
+
                     SpriteView(scene: gameModel.scene, transition: nil, isPaused: false, preferredFramesPerSecond: 180, options: [.allowsTransparency], shouldRender: { _ in true })
 
                     VStack(alignment: .center) {
@@ -62,6 +62,7 @@ struct ContentView: View {
                                 }
                             }
                         }
+
                         HStack(alignment: .center, spacing: 52 / 6) {
                             ForEach(Array(botoes.enumerated()), id: \.offset) { index, botao in
                                 if index >= 7 {
@@ -83,12 +84,12 @@ struct ContentView: View {
                                                 .onEnded { value in
                                                     if existSound {
                                                         let dropPointSwiftUI = value.location
-                                                        
+
                                                         let skPoint = CGPoint(
                                                             x: dropPointSwiftUI.x - 50,
                                                             y: geo.size.height - dropPointSwiftUI.y - 11
                                                         )
-                                                        
+
                                                         if gameModel.changeTexture(
                                                             textureName: botao.textura,
                                                             soundName: botao.som,
@@ -108,7 +109,14 @@ struct ContentView: View {
                         }.padding(.trailing, 60)
                     }
                     .padding(.bottom, 10)
-
+                    if isPaused {
+                        Color.black.opacity(0.5)
+                            .ignoresSafeArea()
+                        Rectangle()
+                            .fill(Color.white)
+                            .frame(width: .infinity, height: .infinity)
+                            .padding()
+                    }
                     if let id = draggingID,
                        let botao = botoes.first(where: { $0.id == id })
                     {
@@ -123,15 +131,12 @@ struct ContentView: View {
             }
             .toolbar {
                 Button {
-                    if !isPaused{
+                    if !isPaused {
                         gameModel.pauseAllCats()
                         isPaused = true
-                        print("pausado")
-                    }
-                    else{
+                    } else {
                         gameModel.startAllCats()
                         isPaused = false
-                        print("nao pausado")
                     }
                 } label: {
                     ZStack {
@@ -142,7 +147,7 @@ struct ContentView: View {
                                 Circle()
                                     .fill(Color.cinza.opacity(0.5))
                                     .frame(width: 40, height: 40)
-                            ).padding(.top,30)
+                            ).padding(.top, 30)
                     }
                 }
             }
