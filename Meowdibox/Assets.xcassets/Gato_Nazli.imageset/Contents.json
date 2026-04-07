@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "Property 1=Gato Nazli.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "Gato_Nazli.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

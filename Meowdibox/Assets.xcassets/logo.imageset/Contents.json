@@ -15,7 +15,7 @@
       "scale" : "1x"
     },
     {
-      "filename" : "logo_light.png",
+      "filename" : "Meowsic.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
@@ -26,7 +26,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "logo.png",
+      "filename" : "Meowsic_light.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

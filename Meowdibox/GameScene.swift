@@ -33,6 +33,7 @@ final class GameScene: SKScene {
         }
         
     }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with _: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)

@@ -17,8 +17,8 @@ final class Gato: SKSpriteNode {
         self.slot = slot
         let texture = SKTexture(imageNamed: "Default")
         let scaledSize = CGSize(
-            width: texture.size().width * 0.045,
-            height: texture.size().height * 0.045
+            width: texture.size().width * 0.1,
+            height: texture.size().height * 0.1
         )
         originalSize = scaledSize
         super.init(texture: texture, color: .clear, size: scaledSize)
@@ -47,6 +47,7 @@ final class Gato: SKSpriteNode {
 
         removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
+        childNode(withName: "progressBar")?.removeFromParent()
 
         audio.preparar(slot: slot, soundName: soundName)
 
@@ -108,6 +109,7 @@ final class Gato: SKSpriteNode {
         audio.remover(slot: slot)
         removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
+        childNode(withName: "progressBar")?.removeFromParent()
 
         texture = SKTexture(imageNamed: "Default")
         size = originalSize
@@ -121,6 +123,7 @@ final class Gato: SKSpriteNode {
         audio.remover(slot: slot)
         removeAction(forKey: "playingAnimation")
         childNode(withName: "loadingIndicator")?.removeFromParent()
+        childNode(withName: "progressBar")?.removeFromParent()
 
         texture = SKTexture(imageNamed: "Default")
         size = originalSize
@@ -137,45 +140,66 @@ final class Gato: SKSpriteNode {
     /// Cria o node filho apenas uma vez — evita spam de criação a cada frame.
     func mostrarCarregamento() {
         // Gatos sem som atribuído não exibem indicador
-        guard isCustomizado, !nomeSound.isEmpty,!isSoundPaused else {
+        let barra = audio.tempoRestante(slot: slot)
+
+        guard isCustomizado, !nomeSound.isEmpty else {
             removeAction(forKey: "playingAnimation")
             childNode(withName: "loadingIndicator")?.removeFromParent()
             return
         }
 
         if !audio.estaTocando(slot: slot) {
+            // Cria os dois nós apenas uma vez
             if childNode(withName: "loadingIndicator") == nil {
-                let texture = SKTexture(imageNamed: "carregamento")
-                let scaledSize = CGSize(
-                    width: texture.size().width * 0.03,
-                    height: texture.size().height * 0.03
+                let posX = position.x - 111 * CGFloat(slot + 1) + 15
+                let posY = position.y - size.height / 2 - 70
+                let textureprogres = SKTexture(imageNamed: "progressbar")
+                let scaledSizeBar = CGSize(
+                    width: 50,
+                    height: textureprogres.size().height * 0.5
                 )
 
-                let carregamento = SKShapeNode(rectOf: scaledSize)
-                carregamento.name = "loadingIndicator"
-                carregamento.fillTexture = texture
-                carregamento.position = position
-                carregamento.position.y -= size.height / 2 + 90
-                carregamento.position.x -= 111 * CGFloat(slot + 1)
-                carregamento.fillColor = .white
-                carregamento.strokeColor = .clear
-                carregamento.zPosition = 1
-                carregamento.run(SKAction.repeatForever(
-                    SKAction.sequence([
-                        SKAction.rotate(byAngle: .pi / 4, duration: 0.2),
-                    ])
-                ))
-                addChild(carregamento)
+                let fundo = SKShapeNode(rectOf: scaledSizeBar)
+                
+                fundo.name = "loadingIndicator"
+                fundo.fillTexture = textureprogres
+                fundo.position = CGPoint(x: posX, y: posY)
+                fundo.fillColor = .white
+                fundo.strokeColor = .clear
+                fundo.zPosition = 1
+                addChild(fundo)
+
+                let progresso = SKShapeNode(rectOf: CGSize(width: 50, height: 3),cornerRadius: 3)
+                progresso.name = "progressBar"
+                progresso.position = CGPoint(x: posX, y: posY)
+                progresso.fillColor = .verdecarremento
+                progresso.strokeColor = .clear
+                progresso.zPosition = 2
+                progresso.xScale = 0.001
+                addChild(progresso)
+                
             }
+
+            // Atualiza barra da esquerda para a direita
+            if let remaining = barra,
+               let fundoNode = childNode(withName: "loadingIndicator"),
+               let barNode = childNode(withName: "progressBar") {
+                let progress = max(0.001, min(1.0, CGFloat(1.0 - (remaining / audio.loopDuration))))
+                barNode.xScale = progress
+                // Move o centro da barra para que a borda esquerda fique fixa
+                barNode.position.x = fundoNode.position.x - 25 * (1 - progress)
+            }
+
         } else {
-            // Áudio audível — remove indicador
+            // Áudio audível — remove os dois nós pelo nome correto
             childNode(withName: "loadingIndicator")?.removeFromParent()
+            childNode(withName: "progressBar")?.removeFromParent()
             // Inicia dança apenas uma vez (evita reiniciar toda frame)
             if !isSoundPaused, action(forKey: "playingAnimation") == nil {
                 run(SKAction.repeatForever(
                     SKAction.sequence([
-                        SKAction.scaleY(to: 1.15, duration: 0.3),
-                        SKAction.scaleY(to: 1.0,  duration: 0.3),
+                        SKAction.scale(to: 1.01, duration: 0.3),
+                        SKAction.scale(to: 1.0, duration: 0.3),
                     ])
                 ), withKey: "playingAnimation")
             }

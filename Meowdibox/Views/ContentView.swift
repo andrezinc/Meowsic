@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var draggingID: UUID?
     @State private var dragPosition: CGPoint = .zero
     @State private var isPaused: Bool = false
+    @AppStorage("isDarkMode") private var isDarkMode = false
     var body: some View {
         NavigationView {
             GeometryReader { geo in
@@ -112,10 +113,7 @@ struct ContentView: View {
                     if isPaused {
                         Color.black.opacity(0.5)
                             .ignoresSafeArea()
-                        Rectangle()
-                            .fill(Color.white)
-                            .frame(width: .infinity, height: .infinity)
-                            .padding()
+                        Toggle("Modo escuro", isOn: $isDarkMode)
                     }
                     if let id = draggingID,
                        let botao = botoes.first(where: { $0.id == id })
@@ -129,6 +127,7 @@ struct ContentView: View {
                     gameModel.start(viewSize: geo.size)
                 }
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
             .toolbar {
                 Button {
                     if !isPaused {
@@ -140,7 +139,7 @@ struct ContentView: View {
                     }
                 } label: {
                     ZStack {
-                        Image(systemName: "pause.fill")
+                        Image(systemName: (!isPaused ? "pause.fill" : "play.fill") )
                             .font(.system(size: 15, weight: .bold))
                             .foregroundStyle(.white)
                             .background(

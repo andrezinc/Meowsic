@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "Property 1=Default.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "Default.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

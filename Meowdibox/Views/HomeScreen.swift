@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct HomeScreen: View {
+    @AppStorage("isDarkMode") private var isDarkMode = false
     var body: some View {
         NavigationView {
             ZStack {
@@ -15,22 +16,25 @@ struct HomeScreen: View {
                     .scaledToFill()
                     .ignoresSafeArea()
                 VStack {
-                    
+                    Spacer()
                     Image("logo")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 500)
                         .padding()
                     
+                    Spacer()
                     NavigationLink(destination: ContentView()) {
                         Image(systemName: "play.circle.fill")
                             .resizable()
                             .scaledToFit()
                             .foregroundStyle(.white)
-                            .frame(width: 90, height: 90)
+                            .frame(width: 45, height: 45)
                     }
+                    .padding(.bottom,40)
                 }
             }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }

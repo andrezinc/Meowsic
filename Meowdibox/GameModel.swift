@@ -57,7 +57,7 @@ final class GameModel: ObservableObject {
 
         for i in 0 ..< total {
             let x = startX + CGFloat(i) * spacing
-            let y = viewSize.height / 2 + 50
+            let y = viewSize.height / 2 + 55
             let gatinho = Gato(slot: i, posicaoInicial: CGPoint(x: x, y: y))
             gatinho.model = self
             gatos.append(gatinho)
@@ -67,15 +67,16 @@ final class GameModel: ObservableObject {
 
     func pauseAllCats() {
         for gato in gatos {
-            gato.isSoundPaused = true
+            gato.mute()
         }
         audio.pausarTudo()
     }
 
     func startAllCats() {
         for gato in gatos {
-            gato.isSoundPaused = false
+            gato.noMute()
         }
+        pausedSounds.removeAll()
         audio.resumirTudo()
     }
 }

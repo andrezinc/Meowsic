@@ -82,7 +82,7 @@ final class AudioEngine {
             return
         }
 
-        let format      = file.processingFormat
+        let format = file.processingFormat
         let totalFrames = AVAudioFrameCount(file.length)
 
         guard let tempBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: totalFrames) else {
@@ -92,7 +92,7 @@ final class AudioEngine {
         catch { print("❌ Falha ao ler arquivo: \(error)"); return }
 
         let targetFrames = AVAudioFrameCount(round(format.sampleRate * loopDuration))
-        let framesToUse  = min(targetFrames, tempBuffer.frameLength)
+        let framesToUse = min(targetFrames, tempBuffer.frameLength)
 
         guard let loopBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: framesToUse) else {
             print("❌ Falha ao criar buffer de loop"); return
@@ -111,18 +111,18 @@ final class AudioEngine {
         player.scheduleBuffer(loopBuffer, at: nil, options: .loops)
 
         // --- Cálculo wall-clock do momento de entrada ---
-        let now            = CACurrentMediaTime()
+        let now = CACurrentMediaTime()
         let wallClockStart: Double
 
         if let anchor = anchorWallClock {
-            let elapsed        = now - anchor
-            let secsIntoLoop   = elapsed.truncatingRemainder(dividingBy: loopDuration)
+            let elapsed = now - anchor
+            let secsIntoLoop = elapsed.truncatingRemainder(dividingBy: loopDuration)
             // threshold de 20ms: se estamos quase no início do loop, entramos já
-            let secsToNext     = (secsIntoLoop < 0.02) ? 0.0 : (loopDuration - secsIntoLoop)
-            wallClockStart     = now + secsToNext
+            let secsToNext = (secsIntoLoop < 0.02) ? 0.0 : (loopDuration - secsIntoLoop)
+            wallClockStart = now + secsToNext
         } else {
             // Primeiro som — pequena folga de 20ms para o engine estar pronto
-            wallClockStart  = now + 0.02
+            wallClockStart = now + 0.02
             anchorWallClock = wallClockStart
         }
 
@@ -169,7 +169,9 @@ final class AudioEngine {
     }
 
     func pararTudo() {
-        for slot in Array(players.keys) { remover(slot: slot) }
+        for slot in Array(players.keys) {
+            remover(slot: slot)
+        }
         anchorWallClock = nil
     }
 
@@ -178,6 +180,7 @@ final class AudioEngine {
             setMute(slot: slot, muted: true)
         }
     }
+
     func resumirTudo() {
         for slot in Array(players.keys) {
             setMute(slot: slot, muted: false)
@@ -201,5 +204,10 @@ final class AudioEngine {
         guard let wallStart = scheduledWallClockStarts[slot] else { return true }
         return CACurrentMediaTime() >= wallStart
     }
-    
+
+    func tempoRestante(slot: Int) -> Double? {
+        guard let wallStart = scheduledWallClockStarts[slot] else { return nil }
+        let remaining = wallStart - CACurrentMediaTime()
+        return max(0, remaining)
+    }
 }
