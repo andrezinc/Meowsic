@@ -69,7 +69,7 @@ final class GameModel: ObservableObject {
         for gato in gatos {
             gato.mute()
         }
-        audio.pausarTudo()
+        //audio.pausarTudo()
     }
 
     func startAllCats() {
@@ -77,6 +77,6 @@ final class GameModel: ObservableObject {
             gato.noMute()
         }
         pausedSounds.removeAll()
-        audio.resumirTudo()
+       // audio.resumirTudo()
     }
 }

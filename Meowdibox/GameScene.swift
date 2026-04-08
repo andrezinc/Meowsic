@@ -4,7 +4,7 @@ import SwiftUI
 final class GameScene: SKScene {
     weak var model: GameModel?
     var ultimoPlay: TimeInterval = 0
-    var playInterval: TimeInterval = 16
+    var playInterval: TimeInterval = 4
     
     let longPressGesture = UILongPressGestureRecognizer()
     
