@@ -31,8 +31,6 @@ struct ContentView: View {
                     .padding(.bottom, 10)
                     if isPaused {
                         ZStack(alignment: .center) {
-                            Color.black.opacity(0.5)
-                                .ignoresSafeArea()
                             PauseHomeScreen(pause: $isPaused, isDarkMode: $isDarkMode, onDismiss: {
                                 dismiss()
                             }, gameModel: gameModel)
@@ -58,15 +56,17 @@ struct ContentView: View {
                         isPaused = true
                     }
                 } label: {
-                    ZStack {
-                        Image(systemName: !isPaused ? "pause.fill" : "play.fill")
-                            .font(.system(size: 15, weight: .bold))
-                            .foregroundStyle(.white)
-                            .background(
-                                Circle()
-                                    .fill(Color.cinza.opacity(0.5))
-                                    .frame(width: 40, height: 40)
-                            ).padding(.top, 30)
+                    if(!isPaused){
+                        ZStack {
+                            Image(systemName: "pause.fill")
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundStyle(.white)
+                                .background(
+                                    Circle()
+                                        .fill(Color.cinza.opacity(0.5))
+                                        .frame(width: 40, height: 40)
+                                ).padding(.top, 30)
+                        }
                     }
                 }
             }
@@ -80,54 +80,63 @@ struct PauseHomeScreen: View {
     let onDismiss: () -> Void
     @ObservedObject var gameModel: GameModel
     var body: some View {
-        RoundedRectangle(cornerRadius: 20)
-            .fill(.cinzaFundo)
-            .stroke(.strokeCinza, lineWidth: 10)
-            .frame(width: 485, height: 257)
-            .overlay {
-                VStack(spacing:10) {
-                    
-                    Image("Pause")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 181)
-                    HStack(alignment: .center,spacing: 23){
+        ZStack{
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    gameModel.startAllCats()
+                    pause.toggle()
+                }
+
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.cinzaFundo)
+                .stroke(.strokeCinza, lineWidth: 10)
+                .frame(width: 485, height: 257)
+                .overlay {
+                    VStack(spacing:10) {
                         
-                        Button{
-                            onDismiss()
-                        } label: {
-                            Image("Menu")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 81)
+                        Image("Pause")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 181)
+                        HStack(alignment: .center,spacing: 23){
+                            
+                            Button{
+                                onDismiss()
+                            } label: {
+                                Image("Menu")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50)
+                            }
+                            
+                            Button{
+                                gameModel.startAllCats()
+                                pause.toggle()
+                            }label: {
+                                Image("Continue")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 72)
+                            }
+                            
+                            Button{
+                                isDarkMode.toggle()
+                            }
+                            label: {
+                                Image("Mode")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 50)
+                            }
+                            
                         }
-                        
-                        Button{
-                            gameModel.startAllCats()
-                            pause.toggle()
-                        }label: {
-                            Image("Continue")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 106)
-                        }
-                        
-                        Button{
-                            isDarkMode.toggle()
-                        }
-                        label: {
-                            Image("Mode")
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 81)
-                        }
-                        
                     }
                 }
-            }
+        }
     }
 }
-
+//Refatorar
 struct ShowBotoesContent: View {
     let botoes = BotoesContent.botoes
     var geo: GeometryProxy

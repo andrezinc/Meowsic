@@ -15,7 +15,7 @@
       "scale" : "1x"
     },
     {
-      "filename" : "Menu.png",
+      "filename" : "Light.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
@@ -26,7 +26,7 @@
           "value" : "dark"
         }
       ],
-      "filename" : "Menu_Dark.png",
+      "filename" : "Dark.png",
       "idiom" : "universal",
       "scale" : "2x"
     },

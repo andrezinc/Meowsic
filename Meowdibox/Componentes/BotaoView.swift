@@ -26,29 +26,11 @@ struct BotaoView: View {
     @ViewBuilder
     var iconeDoBotao: some View {
         if !mutado {
-            let simbolo = botao.icone
-            if UIImage(systemName: simbolo) != nil {
-                if(simbolo == "pianokeys"){ //Lixo de codigo
-                    Image(systemName: colorScheme == .dark ? "pianokeys" : "pianokeys.inverse")
-                        .foregroundStyle(.white)
-                        .font(.system(size: 24))
-                        .padding(20)
-                }
-                else{
-                    Image(systemName: simbolo)
-                        .foregroundStyle(.white)
-                        .font(.system(size: 24))
-                        .padding(20)
-                }
-            }else{
-                Image(simbolo)
-                    .resizable()
-                    .foregroundStyle(.white)
-                    .scaledToFit()
-                    .frame(width: 25,height: 25)
-                    .padding(20)
-                
-            }
+            Image(botao.icone)
+                .resizable()
+                .foregroundStyle(.white)
+                .scaledToFit()
+                .frame(width: 35)
         } else {
             Image(systemName: "speaker.slash.fill")
                 .resizable()
